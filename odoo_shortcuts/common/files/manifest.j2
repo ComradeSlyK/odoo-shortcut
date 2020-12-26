@@ -1,0 +1,24 @@
+{{ data['copyright_header'] }}
+
+{
+    'name': '{{ data['name'] }}',
+    'version': '{{ data['odoo_version'] }}.1.0.0',
+    'category': '{{ data['category'] }}',
+    'description': """
+        {{ data['description'] }}
+    """,
+    'summary': "{{ data['summary'] }}",
+    'author': '{{ data['author'] }}',
+    'license': '{{ data['license'] }}',
+    'website': '{{ data['website'] }}',
+    'depends': {{ data['depends'] }},
+    'conflicts': {{ data['conflicts'] }},
+    'external_dependencies': {
+        'bin': {{ data['external_deps_bin'] }},
+        'python': {{ data['external_deps_python'] }},
+    },
+    'data': {{ data['data'] }},
+    'application': {{ data['application'] }},
+    'auto_install': {{ data['auto_install'] }},
+    'installable': {{ data['installable'] }},
+}
