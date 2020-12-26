@@ -43,7 +43,10 @@ user:~/path/to/my/repo$ generate_odoo_module -m pizza_delivery
 ```
 
 4. Creating a new module will always create the proper `__init__.py` files and
-add the `icon.png` file within the `static/description/` folder: the
-`module_generator` script internally calls the other 2 scripts; the
-`init_generator` script too, though, will internally call the
-`copyright_header_generator` script. This way, everything is faster!
+add the `icon.png` file within the `static/description/` folder; it will also
+properly fill some of the `__manifest__.py` info. Moreover, when generating new
+`__init__.py` files for existing module, the copyright header (re)generation
+will automatically be triggered. This is possible because these scripts call
+each other: this will make everything faster, though it may turn into some
+unwanted effects if the scripts are not used properly.  Feel free to take your
+time and test them as long as you wish!
