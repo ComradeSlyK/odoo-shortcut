@@ -1,22 +1,19 @@
 # Copyright 2020-TODAY ComradeSlyK (gregorini.silvio@gmail.com)
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl).
 
-import sys
-
 from argparse import ArgumentParser
 from pathlib import Path
 
-from ._const import ARGS
+from .args_parser_params import _args_getter
 
 
 class Parser(ArgumentParser):
 
     def _setup(self):
-        for vals in ARGS.values():
+        for vals in _args_getter().values():
             self.add_argument(*vals['args'], **vals['kwargs'])
 
-    @property
-    def args_dict(self):
+    def args_getter(self):
         ns = self.parse_args()
 
         # The arguments dict will be created by formatting the args namespace
@@ -24,7 +21,7 @@ class Parser(ArgumentParser):
         ad = dict(ns._get_kwargs())
 
         maker = type(self)._val_maker
-        for vals in ARGS.values():
+        for vals in _args_getter().values():
             ad[vals['kwargs']['dest']] = maker(
                 vals['type'],
                 vals['kwargs']['dest'],
@@ -32,18 +29,22 @@ class Parser(ArgumentParser):
                 vals['manifest']
             )
 
+        # Custom keyword: add the module path even if not defined in script
+        # arguments namespace
+        ad['module_path'] = ad['repo_path'].joinpath(ad['module_name'])
+
         return ad
 
     @classmethod
-    def _bool_maker(cls, val, manifest):
+    def _bool_maker(cls, val, *a, **kw):
         return bool(eval(val or ''))
 
     @classmethod
-    def _int_maker(cls, val, manifest):
+    def _int_maker(cls, val, *a, **kw):
         return int(val)
 
     @classmethod
-    def _list_maker(cls, val, manifest):
+    def _list_maker(cls, val, manifest, *a, **kw):
         if val and manifest:
             res = '['
             for c in val.split(','):
@@ -57,20 +58,20 @@ class Parser(ArgumentParser):
         return res
 
     @classmethod
-    def _path_maker(cls, val, manifest):
+    def _path_maker(cls, val, *a, **kw):
         path = Path(val)
         if '~' in val:
             path = path.expanduser()
         return path.absolute()
 
     @classmethod
-    def _str_maker(cls, val, manifest):
+    def _str_maker(cls, val, *a, **kw):
         return str(val or '')
 
     @classmethod
-    def _val_maker(cls, argtype, fname, val, manifest):
+    def _val_maker(cls, argtype, fname, val, manifest, *a, **kw):
         try:
-            return getattr(cls, f'_{argtype}_maker')(val, manifest)
+            return getattr(cls, f'_{argtype}_maker')(val=val, manifest=manifest, *a, **kw)
         except AttributeError:
             raise AttributeError(
                 f"Cannot parse argument to type '{argtype}'. Make sure a"

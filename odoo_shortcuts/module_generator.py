@@ -7,70 +7,12 @@ Generates a whole new module within the specified repo
 
 import sys
 from jinja2 import Environment, FileSystemLoader
+from json import load
 from os.path import splitext
 from pathlib import Path
-from shutil import copy
 
 from common.args_parser import parser
-
-
-def add_icon(module_path, data):
-    """
-    :param pathlib.Path module_path: the module as pathlib.Path object
-    :param dict data: module data
-    """
-    icon_path = data['icon_path']
-    if icon_path:
-        try:
-            static_path = create_directory('static', module_path)
-        except FileExistsError:
-            static_path = module_path.joinpath('static')
-        try:
-            descr_path = create_directory('description', static_path)
-        except FileExistsError:
-            descr_path = static_path.joinpath('description')
-        copy(icon_path, str(descr_path.joinpath('icon.png')))
-
-
-def create_file(name, path):
-    """
-    :param str name: the module technical name
-    :param pathlib.Path path: a ``pathlib.Path`` object representing the
-        directory parent folder
-    :return: a ``pathlib.Path`` object representing the file itself
-    """
-    file_path = path.joinpath(name)
-    if file_path.exists():
-        raise FileExistsError(
-            f"File {name} in path {str(path)} already exists."
-        )
-    copyfile = ''
-    if splitext(name.lower())[-1] == '.xml':
-        copyfile = 'common/files/defaults/record.xml'
-    elif name.lower() == 'ir.model.access.csv':
-        copyfile = 'common/files/defaults/ir.model.access.csv'
-    if copyfile:
-        default = Path(__file__).parent.joinpath(copyfile)
-        copy(str(default), str(file_path))
-        return file_path
-    with open(str(file_path), 'w'):
-        return file_path
-
-
-def create_directory(name, path):
-    """
-    :param str name: the module technical name
-    :param pathlib.Path path: a ``pathlib.Path`` object representing the
-        directory parent folder
-    :return: a ``pathlib.Path`` object representing the directory itself
-    """
-    dir_path = path.joinpath(name)
-    if dir_path.exists():
-        raise FileExistsError(
-            f"Directory {name} in path {str(path)} already exists."
-        )
-    dir_path.mkdir()
-    return dir_path
+from common.file_manager import create_directory, create_file
 
 
 def create_manifest(module_path, data):
@@ -88,94 +30,53 @@ def create_manifest(module_path, data):
         manifest.write(template.render(data=data))
 
 
-def create_module(name, path):
-    """
-    :param str name: the module technical name
-    :param pathlib.Path path: a ``pathlib.Path`` object representing the module
-        parent directory
-    """
-    if not (path.exists() and path.is_dir()):
-        raise ValueError(
-            f"Cannot create an Odoo module in path {str(path)}: it either"
-            f" doesn't exist, or it's not a directory."
-        )
-    return create_directory(name, path)
-
-
 def create_structure(module_path, data):
     """
     :param pathlib.Path module_path: the module as pathlib.Path object
     :param dict data: module data
     """
+
+    def _create_structure(_path, _vals):
+        if _vals['type'] == 'dir':
+            create_directory(_path)
+            for k, v in _vals.items():
+                if k != 'type':
+                    _create_structure(_path.joinpath(k), v)
+        elif _vals['type'] == 'file':
+            create_file(_path)
+            if update_data and splitext(str(_path))[-1].lower() != '.py':
+                data_to_argv.append(str(_path.relative_to(module_path)))
+
     # If keyword 'data' is not set, we'll update it according to the files
     # we'll find within the module structure
     update_data = data['data'] == '[]'
     data_to_argv = []
-    for subs in map(lambda s: s.split('/'), data['structure']):
-        is_directory = len(subs) > 1 and not subs[-1]
-        for x in range(len(subs)):
-            is_last_element = x == len(subs) - 1
-            name = subs[x]
-            if x:
-                path = module_path.joinpath('/'.join(subs[:x]))
-            else:
-                path = module_path
-            try:
-                if is_last_element and is_directory:
-                    create_directory(name, path)
-                elif is_last_element:
-                    if update_data and splitext(name.lower())[-1] != '.py':
-                        data_to_argv.append('/'.join(subs))
-                    create_file(name, path)
-                else:
-                    create_directory(name, path)
-            except FileExistsError:
-                pass
-            except Exception:
-                raise
+    with open(data['structure_path'], 'r') as structure_json:
+        structure_data = load(structure_json)
+    for name, vals in structure_data.items():
+        _create_structure(module_path.joinpath(name), vals)
+
     if data_to_argv:
         sys.argv.append('--data=' + ','.join(data_to_argv))
-        data.update(parser.args_dict)
+        data.update(parser.args_getter())
 
 
-def generate_init_files(module_path, data):
+def generate_module(module_path, data):
     """
-    :param pathlib.Path module_path: the module as pathlib.Path object
-    :param dict data: module data
-    """
-    copyright_header = data['copyright_header'] + '\n'
-
-    # Creating __init__.py files for most common directories
-    valid_subdirs = []
-    for subdir in ['controllers', 'models', 'report', 'wizard']:
-        subdirpath = module_path.joinpath(subdir)
-        if subdirpath.exists():
-            with open(str(subdirpath.joinpath('__init__.py')), 'w') as init:
-                init.write(copyright_header)
-            valid_subdirs.append(subdir)
-
-    if valid_subdirs:
-        with open(str(module_path.joinpath('__init__.py')), 'w') as init:
-            init.write(copyright_header + '\n')
-            for subdir in valid_subdirs:
-                init.write(f'from . import {subdir}\n')
-
-
-def generate_module(name, path, data):
-    """
-    :param str name: the module technical name
-    :param pathlib.Path path: a ``pathlib.Path`` object representing the module
-        repository directory
+    :param pathlib.Path module_path: a ``pathlib.Path`` object representing the
+        module directory
     :param dict data: a dictionary containing every useful info about
     the module being created
     """
-    module = create_module(name, path)
-    create_structure(module, data)
-    create_manifest(module, data)
-    generate_init_files(module, data)
-    add_icon(module, data)
+    create_directory(module_path)
+    create_structure(module_path, data)
+    create_manifest(module_path, data)
+    from init_generator import generate_init
+    generate_init(module_path)
+    from icon_generator import generate_icon
+    generate_icon(module_path, data['icon_path'])
 
 
 if __name__ == '__main__':
-    data = parser.args_dict
-    generate_module(data['module_name'], data['repo_path'], data)
+    mdata = parser.args_getter()
+    generate_module(mdata['repo_path'].joinpath(mdata['module_name']), mdata)

@@ -1,0 +1,80 @@
+{
+  "controllers": {
+    "type": "dir",
+    "__init__.py": {
+      "type": "file"
+    }
+  },
+  "data": {
+    "type": "dir"
+  },
+  "i18n": {
+    "type": "dir"
+  },
+  "migrations": {
+    "type": "dir"
+  },
+  "models": {
+    "type": "dir",
+    "__init__.py": {
+      "type": "file"
+    }
+  },
+  "report": {
+    "type": "dir",
+    "templates": {
+      "type": "dir"
+    },
+    "__init__.py": {
+      "type": "file"
+    }
+  },
+  "security": {
+    "type": "dir",
+    "ir.model.access.csv": {
+      "type": "file"
+    },
+    "ir_rule.xml": {
+      "type": "file"
+    },
+    "res_groups.xml": {
+      "type": "file"
+    }
+  },
+  "static": {
+    "type": "dir",
+    "description": {
+      "type": "dir"
+    },
+    "src": {
+      "type": "dir",
+      "css": {
+        "type": "dir"
+      },
+      "img": {
+        "type": "dir"
+      },
+      "js": {
+        "type": "dir"
+      }
+    }
+  },
+  "test": {
+    "type": "dir"
+  },
+  "views": {
+    "type": "dir"
+  },
+  "wizards": {
+    "type": "dir",
+    "__init__.py": {
+      "type": "file"
+    }
+  },
+  "__init__.py": {
+    "type": "file"
+  },
+  "__manifest__.py": {
+    "type": "file"
+  }
+}
