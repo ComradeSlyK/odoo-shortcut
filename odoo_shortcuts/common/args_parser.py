@@ -26,7 +26,6 @@ class Parser(ArgumentParser):
                 vals['type'],
                 vals['kwargs']['dest'],
                 ad[vals['kwargs']['dest']],
-                vals['manifest']
             )
 
         # Custom behaviour: set the module name from its technical name
@@ -68,18 +67,11 @@ class Parser(ArgumentParser):
         return int(val)
 
     @classmethod
-    def _list_maker(cls, val, manifest, *a, **kw):
-        if val and manifest:
-            res = '['
-            for c in val.split(','):
-                if c.strip():
-                    res += f'\n        \'{c.strip()}\','
-            res += '\n    ]'
-        elif val:
-            res = [c.strip() for c in val.split(',' '') if c.strip()]
-        else:
-            res = '[]'
-        return res
+    def _list_maker(cls, val, *a, **kw):
+        from .args_parser_params import LIST_DEFAULT
+        if val and val != LIST_DEFAULT:
+            return [c.strip() for c in val.split(',' '') if c.strip()]
+        return LIST_DEFAULT
 
     @classmethod
     def _path_maker(cls, val, *a, **kw):
@@ -93,11 +85,9 @@ class Parser(ArgumentParser):
         return str(val or '')
 
     @classmethod
-    def _val_maker(cls, argtype, fname, val, manifest, *a, **kw):
+    def _val_maker(cls, argtype, fname, val, *a, **kw):
         try:
-            return getattr(
-                cls, f'_{argtype}_maker')(val=val, manifest=manifest, *a, **kw
-                                          )
+            return getattr(cls, f'_{argtype}_maker')(val=val, *a, **kw)
         except AttributeError:
             raise AttributeError(
                 f"Cannot parse argument to type '{argtype}'. Make sure a"

@@ -6,21 +6,23 @@ from pathlib import Path
 
 COMMON_DIR = Path(__file__).absolute().parent
 
+LIST_DEFAULT = "[]"
+
 # NB: every 'default' key must be a string! Conversion to other objects
 # should be done by the args parser.
 APPLICATION = "False"
 AUTHOR = "Openforce"
 AUTO_INSTALL = "False"
 CATEGORY = "Hidden"
-CONFLICTS = ""
+CONFLICTS = LIST_DEFAULT
 COPYRIGHT = f"# Copyright {date.today().year}-TODAY Openforce Srls" \
             f" Unipersonale (www.openforce.it)\n" \
             f"# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl)."
-DATA = ""
-DEPENDS = ""
+DATA = LIST_DEFAULT
+DEPENDS = LIST_DEFAULT
 DESCRIPTION = "Long description: what does the module do?"
-EXT_DEP_BIN = ""
-EXT_DEP_PY = ""
+EXT_DEP_BIN = LIST_DEFAULT
+EXT_DEP_PY = LIST_DEFAULT
 ICON_PATH = str(COMMON_DIR.joinpath("files/icon.png"))
 INSTALLABLE = "True"
 LICENSE = "LGPL-3"
@@ -47,7 +49,6 @@ def _args_getter():
                 "dest": "application",
                 "help": "Is the module an app?"
             },
-            "manifest": True,
             "type": "bool",
         },
         "author": {
@@ -60,7 +61,6 @@ def _args_getter():
                 "dest": "author",
                 "help": "Author(s)"
             },
-            "manifest": True,
             "type": "str",
         },
         "auto-install": {
@@ -73,7 +73,6 @@ def _args_getter():
                 "dest": "auto_install",
                 "help": "Is the module auto-installable?"
             },
-            "manifest": True,
             "type": "bool",
         },
         "category": {
@@ -86,7 +85,6 @@ def _args_getter():
                 "dest": "category",
                 "help": "Module category"
             },
-            "manifest": True,
             "type": "str",
         },
         "conflicts": {
@@ -99,7 +97,6 @@ def _args_getter():
                 "dest": "conflicts",
                 "help": "Module conflicts"
             },
-            "manifest": True,
             "type": "list",
         },
         "copyright-header": {
@@ -112,7 +109,6 @@ def _args_getter():
                 "dest": "copyright_header",
                 "help": "Copyright header"
             },
-            "manifest": False,
             "type": "str",
         },
         "data": {
@@ -125,7 +121,6 @@ def _args_getter():
                 "dest": "data",
                 "help": "Module data"
             },
-            "manifest": True,
             "type": "list",
         },
         "depends": {
@@ -138,7 +133,6 @@ def _args_getter():
                 "dest": "depends",
                 "help": "Module dependencies"
             },
-            "manifest": True,
             "type": "list",
         },
         "description": {
@@ -151,7 +145,6 @@ def _args_getter():
                 "dest": "description",
                 "help": "Module description"
             },
-            "manifest": True,
             "type": "str",
         },
         "external-dependencies-bin": {
@@ -164,7 +157,6 @@ def _args_getter():
                 "dest": "external_deps_bin",
                 "help": "Bin dependencies"
             },
-            "manifest": True,
             "type": "list",
         },
         "external-dependencies-python": {
@@ -177,7 +169,6 @@ def _args_getter():
                 "dest": "external_deps_python",
                 "help": "Python dependencies"
             },
-            "manifest": True,
             "type": "list",
         },
         "icon-path": {
@@ -190,7 +181,6 @@ def _args_getter():
                 "dest": "icon_path",
                 "help": "Icon path (where the icon.png will be found)"
             },
-            "manifest": False,
             "type": "path",
         },
         "installable": {
@@ -203,7 +193,6 @@ def _args_getter():
                 "dest": "installable",
                 "help": "Is module installable?"
             },
-            "manifest": True,
             "type": "bool",
         },
         "license": {
@@ -216,7 +205,6 @@ def _args_getter():
                 "dest": "license",
                 "help": "Module license"
             },
-            "manifest": True,
             "type": "str",
         },
         "module-name": {
@@ -230,7 +218,6 @@ def _args_getter():
                 "help": "Module technical name (required!)",
                 "required": True
             },
-            "manifest": False,
             "type": "str",
         },
         "name": {
@@ -243,7 +230,6 @@ def _args_getter():
                 "dest": "name",
                 "help": "Module name"
             },
-            "manifest": True,
             "type": "str",
         },
         "sequence": {
@@ -256,7 +242,6 @@ def _args_getter():
                 "dest": "sequence",
                 "help": "Module sequence"
             },
-            "manifest": True,
             "type": "int",
         },
         "structure-path": {
@@ -269,7 +254,6 @@ def _args_getter():
                 "dest": "structure_path",
                 "help": "Path to module structure .json file"
             },
-            "manifest": False,
             "type": "path",
         },
         "summary": {
@@ -282,7 +266,6 @@ def _args_getter():
                 "dest": "summary",
                 "help": "Module summary"
             },
-            "manifest": True,
             "type": "str",
         },
         "repo-path": {
@@ -296,7 +279,6 @@ def _args_getter():
                 "dest": "repo_path",
                 "help": "Repo path"
             },
-            "manifest": False,
             "type": "path",
         },
         "version": {
@@ -309,7 +291,6 @@ def _args_getter():
                 "dest": "version",
                 "help": "Odoo version"
             },
-            "manifest": True,
             "type": "str",
         },
         "website": {
@@ -322,7 +303,6 @@ def _args_getter():
                 "dest": "website",
                 "help": "Module website"
             },
-            "manifest": True,
             "type": "str",
         },
     }
