@@ -25,13 +25,13 @@ ICON_PATH = str(COMMON_DIR.joinpath("files/icon.png"))
 INSTALLABLE = "True"
 LICENSE = "LGPL-3"
 NAME = "Module name"
-ODOO_VERSION = "X.X"
 # NB: if not manually specified, we use the path from which the scripts are
 # being executed
 REPO_PATH = Path(".").absolute()
 SEQUENCE = "100"
 STRUCTURE_PATH = str(COMMON_DIR.joinpath("files/structure.json"))
 SUMMARY = "Short description"
+VERSION = "X.0.1.0.0"
 WEBSITE = "http://www.openforce.it"
 
 
@@ -246,19 +246,6 @@ def _args_getter():
             "manifest": True,
             "type": "str",
         },
-        "odoo-version": {
-            "args": [
-                "--odoo-version"
-            ],
-            "kwargs": {
-                "action": "store",
-                "default": ODOO_VERSION,
-                "dest": "odoo_version",
-                "help": "Odoo version"
-            },
-            "manifest": True,
-            "type": "str",
-        },
         "sequence": {
             "args": [
                 "--sequence"
@@ -311,6 +298,19 @@ def _args_getter():
             },
             "manifest": False,
             "type": "path",
+        },
+        "version": {
+            "args": [
+                "--version"
+            ],
+            "kwargs": {
+                "action": "store",
+                "default": VERSION,
+                "dest": "version",
+                "help": "Odoo version"
+            },
+            "manifest": True,
+            "type": "str",
         },
         "website": {
             "args": [

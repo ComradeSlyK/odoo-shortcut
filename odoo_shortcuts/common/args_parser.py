@@ -29,9 +29,33 @@ class Parser(ArgumentParser):
                 vals['manifest']
             )
 
-        # Custom keyword: add the module path even if not defined in script
+        # Custom behaviour: set the module name from its technical name
+        from .args_parser_params import NAME
+        if ad['name'] == NAME:
+            ad['name'] = ' '.join(
+                [w.title() for w in ad['module_name'].split('_')]
+            )
+
+        # Custom behaviour: add the module path even if not defined in script
         # arguments namespace
         ad['module_path'] = ad['repo_path'].joinpath(ad['module_name'])
+
+        # Custom behaviour: set the version number with exactly 5 non-empty
+        # values
+        from .args_parser_params import VERSION
+        version_vals = VERSION.split('.')
+        version = ad['version'].split('.')
+        if len(version) < 5:
+            version.extend(version_vals[len(version):])
+        elif len(version) > 5:
+            version = version[:5]
+        new_version = []
+        for v, w in zip(version, version_vals):
+            try:
+                new_version.append(str(int(v if v.strip() else w)))
+            except ValueError:
+                new_version.append(v if v.strip() else w)
+        ad['version'] = '.'.join(new_version)
 
         return ad
 
@@ -71,7 +95,9 @@ class Parser(ArgumentParser):
     @classmethod
     def _val_maker(cls, argtype, fname, val, manifest, *a, **kw):
         try:
-            return getattr(cls, f'_{argtype}_maker')(val=val, manifest=manifest, *a, **kw)
+            return getattr(
+                cls, f'_{argtype}_maker')(val=val, manifest=manifest, *a, **kw
+                                          )
         except AttributeError:
             raise AttributeError(
                 f"Cannot parse argument to type '{argtype}'. Make sure a"
